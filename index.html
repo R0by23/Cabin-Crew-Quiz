@@ -5,433 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cabin Crew Quiz</title>
   <style>
-    body.dark-mode { background: #1e1e1e; color: #ffffff; }
-    .dark-mode .question { background: #2e2e2e; color: #f0f0f0; box-shadow: 0 0 10px rgba(255,255,255,0.05); }
-    .dark-mode .submit-btn { background: #444; color: white; }
-    .dark-mode #timer { color: #ffcc00; }
-    body { font-family: sans-serif; background: #f9f9f9; padding: 2rem; }
-    .question { background: #fff; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    .question h3 { margin-top: 0; }
-    .options label { display: block; margin: 0.25rem 0; }
-    .submit-btn { background: #007bff; color: white; padding: 0.5rem 1rem; border: none; border-radius: 0.25rem; cursor: pointer; margin-top: 1rem; }
+    body { font-family: sans-serif; padding: 2rem; background: #f5f5f5; }
+    .question { background: #fff; padding: 1rem; margin-bottom: 1rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .submit-btn { margin: 10px 0; padding: 0.5rem 1rem; border: none; border-radius: 4px; background: #007bff; color: white; cursor: pointer; }
     .result { margin-top: 1rem; font-weight: bold; }
+    table { border-collapse: collapse; width: 100%; margin-top: 2rem; }
+    table, th, td { border: 1px solid #ccc; padding: 8px; }
   </style>
 </head>
 <body>
-  <h1>Cabin Crew Quiz - Medical Conditions (50 Questions)</h1>
-
-  <div id="timer" style="font-weight: bold; margin-bottom: 1rem; color: #b30000;"></div>
-  <label for="username" style="font-weight:bold;">Enter your name:</label>
-<input type="text" id="username" placeholder="Your Name" style="margin-bottom:1rem; display:block; padding:0.5rem; font-size:1rem;" />
-<div id="quiz-container"></div>
-
-  <button class="submit-btn" onclick="gradeQuizWithValidation()">Submit</button>
-  <button class="submit-btn" onclick="resetQuiz()">Try Again</button>
+  <h1>Cabin Crew Quiz</h1>
+  <label for="username">Your Name:</label>
+  <input type="text" id="username" placeholder="Enter your name" style="margin-bottom:1rem;" />
+  <div id="quiz-container"></div>
+  <button class="submit-btn" onclick="gradeQuiz()">Submit</button>
   <div class="result" id="result"></div>
-<canvas id="scoreChart" width="400" height="200" style="margin-top: 1rem;"></canvas>
-<div id="remoteResults" style="margin-top: 2rem;"></div>
-<div style="margin-top:1rem;">
-  <label for="filterName"><strong>Filter by name:</strong></label>
-  <input type="text" id="filterName" placeholder="Enter name to filter" style="padding:0.5rem; margin-left:0.5rem; font-size:1rem;" oninput="filterTable()">
-  <button onclick="refreshResults()" style="margin-left:1rem; padding:0.5rem 1rem; cursor:pointer;">🔄 Refresh</button>
-</div>
+  <h2>Participants</h2>
+  <div id="resultsTable"></div>
 
   <script>
     const questions = [
-      "What is the first step when a passenger reports feeling chest pain?",
-      "Can passengers carry personal medication onboard?",
-      "What is the purpose of a MEDIF form?",
-      "When assisting a diabetic passenger, what must crew avoid?",
-      "A passenger has a seizure. What is your first response?",
-      "Oxygen bottles onboard should be used:",
-      "Can a person with a recent surgery fly?",
-      "A passenger vomits repeatedly. What is the correct action?",
-      "What is hypoxia?",
-      "What tool measures passenger oxygen level?",
-      "A mentally ill passenger begins shouting. What should crew do?",
-      "What condition may require immediate landing?",
-      "What is DVT?",
-      "For a passenger who faints briefly, crew should:",
-      "Are flight attendants allowed to give injections?",
-      "Who decides if medical diversion is needed?",
-      "What is a common risk for elderly passengers?",
-      "A child with high fever is boarding. Action?",
-      "How to identify asthma emergency?",
-      "Where should EEMK be located?",
-      "If a passenger with diabetes appears confused and sweaty, what should you do?",
-      "What is the role of a Good Samaritan doctor on board?",
-      "Can a person with epilepsy fly?",
-      "When using an onboard defibrillator (AED), the first step is to:",
-      "What is considered a communicable disease?",
-      "What precaution applies to passengers with infectious diseases?",
-      "What is hyperventilation?",
-      "For a burn injury onboard, apply:",
-      "Who has authority over use of medical kits onboard?",
-      "What is motion sickness?",
-      "Which passenger condition requires careful seat allocation?",
-      "A choking passenger shows no breath or sound. Action?",
-      "What is hypoglycemia?",
-      "Which medical item is found in both FAK and EEMK?",
-      "How do you calm a passenger having a panic attack?",
-      "What’s the use of the demo mask?",
-      "A child with asthma forgets their inhaler. Crew should:",
-      "Can airline refuse to board someone with recent contagious illness?",
-      "What is the purpose of a medical alert bracelet?",
-      "If a patient has oxygen support needs, what should be verified?",
-      "What is the purpose of reclined seat for medical passengers?",
-      "Which symptom needs urgent care?",
-      "What medical condition is worsened by low cabin pressure?",
-      "How should crew handle suspected stroke?",
-      "A person reports an allergic reaction. What do you check?",
-      "What is used in CPR?",
-      "A bleeding nose should be treated by:",
-      "Medical emergency midflight – what must be documented?",
-      "Can a passenger with hearing impairment sit in exit row?",
-      "What is the crew’s duty during any onboard medical case?"
+      { q: "What is hypoxia?", a: ["A. Oxygen overload", "B. Oxygen deficiency", "C. Panic attack", "D. Hyperactivity"], correct: "B" },
+      { q: "Can a person with epilepsy fly?", a: ["A. Never", "B. Only with doctor", "C. If stable", "D. With escort"], correct: "C" }
     ];
 
-    const options = [
-      ["A. Offer water", "B. Notify senior crew and assess condition", "C. Move them to the galley", "D. Let them rest"],
-      ["A. No", "B. Only in cargo", "C. Yes, with proper documentation", "D. Yes, but not in carry-on"],
-      ["A. Identification", "B. Customs declaration", "C. Medical fitness to fly", "D. Lost luggage report"],
-      ["A. Offering sweet snacks", "B. Giving water", "C. Providing insulin", "D. Ignoring symptoms"],
-      ["A. Insert a spoon", "B. Protect and monitor", "C. Restrain", "D. Ask others to film"],
-      ["A. Any faint passenger", "B. Crew only", "C. Per protocol", "D. Hyperactive children"],
-      ["A. Always", "B. Doctor’s clearance", "C. Never", "D. Under 2 hours"],
-      ["A. Move seat", "B. Offer alcohol", "C. Provide bag & assess", "D. Ignore"],
-      ["A. Blood sugar drop", "B. Oxygen deficiency", "C. Panic disorder", "D. Jetlag"],
-      ["A. Glucometer", "B. Thermometer", "C. Pulse oximeter", "D. ECG monitor"],
-      ["A. Shout back", "B. De-escalate & alert", "C. Ignore", "D. Ask passengers"],
-      ["A. Mild fever", "B. Heart attack symptoms", "C. Motion sickness", "D. Muscle cramp"],
-      ["A. Deep Vein Thrombosis", "B. Delayed Vital Test", "C. Vision Trouble", "D. Decompression test"],
-      ["A. Call cockpit", "B. Offer alcohol", "C. Lay flat & elevate legs", "D. Move row"],
-      ["A. Yes", "B. No, unless trained", "C. Only in emergencies", "D. Always"],
-      ["A. Crew", "B. Doctor onboard", "C. Captain", "D. Purser"],
-      ["A. Jetlag", "B. DVT & dehydration", "C. Overeating", "D. Air rage"],
-      ["A. Allow", "B. Require clearance", "C. Ignore parent", "D. Give candy"],
-      ["A. Fast talking", "B. Wheezing", "C. Sleepiness", "D. Nausea"],
-      ["A. Cockpit", "B. Rear galley", "C. Accessible area", "D. Crew rest"],
-      ["A. Offer juice", "B. Offer water", "C. Ask to sleep", "D. Ignore"],
-      ["A. Provide food", "B. Medical help voluntarily", "C. Ignore", "D. Supervise crew"],
-      ["A. Never", "B. With medication", "C. Business class only", "D. With doctor"],
-      ["A. Press button", "B. Apply pads & power on", "C. Call captain", "D. Check battery"],
-      ["A. Migraine", "B. Flu with rash", "C. Broken leg", "D. Jetlag"],
-      ["A. Seat in cockpit", "B. Deny or isolate", "C. Ignore", "D. Give water"],
-      ["A. Lack of oxygen", "B. Rapid breathing", "C. Low sugar", "D. Altitude"],
-      ["A. Ice", "B. Ointment", "C. Cool water", "D. Salt"],
-      ["A. Any attendant", "B. Captain/senior crew", "C. Ground staff", "D. Purser"],
-      ["A. Mental illness", "B. Imbalance reaction", "C. Panic", "D. Injury"],
-      ["A. Broken arm", "B. Nosebleed", "C. Obesity", "D. Sunglasses"],
-      ["A. Call doctor", "B. Encourage cough", "C. Heimlich", "D. Water"],
-      ["A. High BP", "B. High sugar", "C. Low sugar", "D. Low oxygen"],
-      ["A. Aspirin", "B. Syringe", "C. Bandages", "D. Thermometer"],
-      ["A. Oxygen", "B. Calm voice", "C. Ignore", "D. Water"],
-      ["A. Fire mask", "B. Oxygen demo mask", "C. Training only", "D. Evac tool"],
-      ["A. Ignore", "B. Oxygen & kit", "C. Move", "D. Candy"],
-      ["A. No", "B. Yes, safety", "C. Economy only", "D. With police"],
-      ["A. Decoration", "B. Allergy ID", "C. Passport", "D. Airline use"],
-      ["A. Stylish", "B. Battery, flow, approval", "C. Family consent", "D. Insurance"],
-      ["A. Entertainment", "B. Meal service", "C. Circulation", "D. Baggage"],
-      ["A. Dry mouth", "B. Chest pain", "C. Tiredness", "D. Burping"],
-      ["A. Hypertension", "B. Jetlag", "C. Appendicitis", "D. Altitude sickness"],
-      ["A. Ignore", "B. Monitor", "C. FAST: Face, Arms, Speech, Time", "D. Passport"],
-      ["A. Itinerary", "B. EpiPen", "C. Shoes", "D. Passport"],
-      ["A. Oxygen", "B. CPR compressions + breaths", "C. Bandages", "D. AED only"],
-      ["A. Tilt back", "B. Pinch & lean forward", "C. Blanket", "D. Blow nose"],
-      ["A. Nationality", "B. Incident & actions", "C. Flight time", "D. Gate"],
-      ["A. Always", "B. With glasses", "C. With crew approval", "D. Never"],
-      ["A. Duty-free", "B. Follow protocol & report", "C. Wait captain", "D. Ask passengers"]
-    ];
+    const scriptURL = "https://script.google.com/macros/s/AKfycbyo3zL6WlXPoCLkH2WImfA9SaFtXDlI__f1md0FIB4N5xn9Qp5UzR64AEKhvRLddOw3/exec";
 
-    const answers = ["B","C","C","A","B","C","B","C","B","C","B","B","A","C","B","C","B","B","B","C","A","B","B","B","B","B","B","C","B","B","C","C","C","C","B","B","B","B","B","B","C","B","D","C","B","B","B","B","C","B"];
-
-    const quizContainer = document.getElementById("quiz-container");
-    questions.forEach((question, index) => {
-      const div = document.createElement("div");
-      div.className = "question";
-      div.innerHTML = `<h3>${index + 1}. ${question}</h3>` +
-        options[index].map(option => `<label><input type="radio" name="q${index + 1}" value="${option.charAt(0)}"> ${option}</label>`).join("");
-      quizContainer.appendChild(div);
-    });
-
-    let quizHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-
-function gradeQuiz() {
-  const explanations = [
-  "Chest pain can be a serious symptom of a heart attack. Notifying the senior crew allows for proper assessment and potential diversion if needed.",
-  "Passengers are allowed to bring medication onboard as long as it's properly documented, labeled, and declared, especially if medically necessary.",
-  "A MEDIF (Medical Information Form) is used to confirm a passenger’s medical fitness to fly, especially in special conditions or after recent health issues.",
-  "While sweet snacks can help a diabetic in hypoglycemia, blindly offering them without checking the situation may cause more harm. Always verify or ask.",
-  "The priority is to prevent injury and monitor breathing. Never insert objects or restrain someone during a seizure.",
-  "Oxygen must be administered following airline protocol, and only when necessary based on symptoms and crew training.",
-  "Recent surgery can increase the risk of complications such as deep vein thrombosis. A medical clearance ensures it's safe to fly.",
-  "Repeated vomiting may indicate a more serious issue. The crew should comfort the passenger, assess, and follow procedures.",
-  "Hypoxia means low oxygen levels in the body, which can happen due to cabin pressure issues or breathing problems.",
-  "Pulse oximeters are non-invasive devices that measure blood oxygen saturation and help assess passengers in distress.",
-  "Shouting or provoking a mentally ill passenger can escalate things. Crew should de-escalate calmly and notify the senior crew.",
-  "Heart attack symptoms mid-flight are life-threatening. Immediate landing may be necessary for medical attention.",
-  "DVT (Deep Vein Thrombosis) is the formation of clots in the legs, usually from long immobility. It's dangerous during flights.",
-  "Raising the legs while laying flat improves blood flow to the brain, aiding in recovery from fainting spells.",
-  "Only medically trained and authorized crew should administer injections, and only when protocols allow it.",
-  "The captain has final authority to approve a medical diversion based on crew reports and medical advice if available.",
-  "Older passengers are at higher risk of dehydration, circulatory issues, and slower responses. Crew should monitor closely.",
-  "Fever in children can indicate contagious illness. A medical clearance is needed to ensure the child’s and others’ safety.",
-  "Asthma emergencies often involve wheezing, retractions, and rapid breathing. Immediate care is required.",
-  "The Enhanced Emergency Medical Kit (EEMK) must be accessible in a marked and approved location known by the crew.",
-  "Confusion and sweating are symptoms of hypoglycemia. Juice or glucose should be administered immediately.",
-  "Doctors traveling as passengers can provide emergency aid under Good Samaritan laws if willing and able.",
-  "Epileptic passengers can usually travel safely if the condition is stable and medication is taken properly.",
-  "The AED (Automated External Defibrillator) should be powered on and pads applied immediately. It provides voice prompts for the user.",
-  "Symptoms like rash with fever can indicate a communicable disease. It may require isolation or denial of boarding.",
-  "Airlines can deny boarding or isolate passengers with contagious diseases to protect others onboard.",
-  "Hyperventilation is caused by anxiety or panic, not oxygen deficiency. Calming the person helps regulate breathing.",
-  "Burns should be treated by applying cool water, not ointment or ice, which could damage skin further.",
-  "Only the captain or senior crew can authorize the use of medical kits to ensure accountability and protocol adherence.",
-  "Motion sickness is caused by a mismatch between what the eyes see and the inner ear senses, leading to nausea.",
-  "Passengers with obesity may require special seating arrangements and must not obstruct aisles or emergency exits.",
-  "If someone is choking and cannot breathe or speak, the Heimlich maneuver (abdominal thrusts) must be applied immediately.",
-  "Hypoglycemia is low blood sugar, which can cause confusion, fainting, or seizures if untreated.",
-  "Bandages are part of both the First Aid Kit (FAK) and the Enhanced Emergency Medical Kit (EEMK) for treating wounds.",
-  "Reassuring tone, calm body language, and encouraging slow breathing are key to helping a person through a panic attack.",
-  "The demo mask is used to teach passengers how to put on oxygen masks properly in the event of cabin depressurization.",
-  "If a child with asthma has no inhaler, oxygen may be given and other first aid or emergency kit supplies may be used.",
-  "Yes, the airline can deny boarding to protect others when a passenger recently had or shows signs of a contagious illness.",
-  "Medical alert bracelets inform the crew about important conditions (like diabetes or allergies) in case of emergency.",
-  "Crew must verify battery level, flow rate, and airline approval for any personal oxygen support equipment onboard.",
-  "Reclined seats help improve blood flow and reduce stress, especially for passengers recovering from illness or at risk of DVT.",
-  "Chest pain may indicate a heart attack and requires immediate attention, even if symptoms are vague or mild.",
-  "Altitude sickness occurs when low oxygen at cabin pressure levels worsens pre-existing conditions like heart or lung disease.",
-  "The FAST method (Face drooping, Arm weakness, Speech issues, Time to call) helps detect strokes early in-flight.",
-  "An allergic reaction may escalate into anaphylaxis. Check for an EpiPen or any signs of airway obstruction immediately.",
-  "CPR involves chest compressions and rescue breaths to maintain circulation and oxygen to vital organs.",
-  "The correct method is to pinch the nose and lean forward to prevent swallowing blood and to allow drainage.",
-  "Crew must record symptoms, actions taken, and persons involved during any medical emergency to support post-flight reports.",
-  "Passengers in exit rows must be able to hear, see, and understand instructions clearly and act without assistance.",
-  "Crew are required to follow the airline’s medical protocol, assist the passenger, and report everything appropriately."
-];
-
-  let score = 0;
-  for (let i = 0; i < answers.length; i++) {
-    const selected = document.querySelector(`input[name="q${i + 1}"]:checked`);
-    const questionDiv = document.querySelector(`#quiz-container .question:nth-child(${i + 1})`);
-    const existingExplanation = questionDiv.querySelector('.explanation');
-    if (existingExplanation) existingExplanation.remove();
-    if (selected && selected.value === answers[i]) {
-      score++;
-    } else {
-      const explanationText = explanations[i] || "No explanation available.";
-      const explanationDiv = document.createElement("div");
-      explanationDiv.className = "explanation";
-      explanationDiv.style.marginTop = "0.5rem";
-      explanationDiv.style.color = "#b30000";
-      explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${answers[i]}<br><strong>Explanation:</strong> ${explanationText}`;
-      questionDiv.appendChild(explanationDiv);
+    function renderQuiz() {
+      const container = document.getElementById('quiz-container');
+      questions.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'question';
+        div.innerHTML = `<h3>${index + 1}. ${item.q}</h3>` +
+          item.a.map(opt =>
+            `<label><input type="radio" name="q${index}" value="${opt.charAt(0)}"> ${opt}</label><br>`
+          ).join('');
+        container.appendChild(div);
+      });
     }
-  }
-  const percentage = Math.round((score / answers.length) * 100);
-  let message = "";
-  if (percentage >= 90) {
-    message = "🏅 Excellent work!";
-  } else if (percentage >= 75) {
-    message = "👍 Good job! Keep practicing.";
-  } else if (percentage >= 50) {
-    message = "✅ Fair, but review is needed.";
-  } else {
-    message = "❗ Needs improvement. Review the material again.";
-  }
-  document.getElementById("result").innerHTML = `You scored ${score} out of ${answers.length} (${percentage}%)<br><progress value="${score}" max="${answers.length}" style="width:100%; height: 20px;"></progress><br><span style='display:inline-block; margin-top: 0.5rem;'>${message}</span>`;
-  renderChart(score, answers.length);
-  const username = document.getElementById('username').value || 'Anonymous';
-  quizHistory.push({ name: username, score, total: answers.length, date: new Date().toLocaleString() });
-  localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
-  showHistoryChart();
-  fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec", {
-    method: "POST",
-    body: JSON.stringify({
-      name: username,
-      score: score,
-      total: answers.length
-    }),
-    headers: {
-      "Content-Type": "application/json"
+
+    function gradeQuiz() {
+      const username = document.getElementById("username").value || "Anonymous";
+      let score = 0;
+      questions.forEach((q, i) => {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected && selected.value === q.correct) score++;
+      });
+      document.getElementById("result").textContent = `You scored ${score} out of ${questions.length}`;
+      fetch(scriptURL, {
+        method: "POST",
+        body: JSON.stringify({ name: username, score: score, total: questions.length }),
+        headers: { "Content-Type": "application/json" }
+      }).then(res => console.log("Sent")).catch(err => console.error(err));
     }
-  }).then(res => console.log("Sent to Google Sheet"))
-    .catch(err => console.error("Error sending to Google Sheet", err));
-}
-function startTimer(duration) {
-  let time = duration;
-  const timerDisplay = document.getElementById("timer");
-  const timerInterval = setInterval(() => {
-    const minutes = Math.floor(time / 60);
-    const seconds = time % 60;
-    timerDisplay.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    if (--time < 0) {
-      clearInterval(timerInterval);
-      gradeQuiz();
-      timerDisplay.textContent = "Time's up! Quiz submitted automatically.";
+
+    function loadResults() {
+      fetch(scriptURL)
+        .then(res => res.text())
+        .then(text => {
+          const rows = text.trim().split("\n").slice(1);
+          const table = document.createElement("table");
+          table.innerHTML = "<tr><th>Name</th><th>Score</th><th>Total</th><th>Date</th></tr>" +
+            rows.map(r => {
+              const cols = r.split(",");
+              return `<tr><td>${cols[0]}</td><td>${cols[1]}</td><td>${cols[2]}</td><td>${cols[3]}</td></tr>`;
+            }).join("");
+          const container = document.getElementById("resultsTable");
+          container.innerHTML = "";
+          container.appendChild(table);
+        });
     }
-  }, 1000);
-}
 
-startTimer(1800);
-
-function resetQuiz() {
-  const inputs = document.querySelectorAll('input[type=radio]');
-  inputs.forEach(input => input.checked = false);
-
-  const explanations = document.querySelectorAll('.explanation');
-  explanations.forEach(expl => expl.remove());
-
-  document.getElementById("result").innerText = "";
-}
-</script>
-<button class="submit-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
-<script>
-function toggleDarkMode() {
-  document.body.classList.toggle("dark-mode");
-}
-
-function countAnswered() {
-  let answered = 0;
-  for (let i = 0; i < answers.length; i++) {
-    const selected = document.querySelector(`input[name='q${i + 1}']:checked`);
-    if (selected) answered++;
-  }
-  return answered;
-}
-
-function gradeQuizWithValidation() {
-  const answered = countAnswered();
-  if (answered < answers.length) {
-    if (!confirm(`You have answered ${answered} out of ${answers.length} questions. Do you want to submit anyway?`)) {
-      return;
-    }
-  }
-  gradeQuiz();
-}
-</script>
-<canvas id="historyChart" width="400" height="200" style="margin-top: 2rem;"></canvas>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-function showHistoryChart() {
-  const ctx = document.getElementById('historyChart').getContext('2d');
-  const data = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-  if (!data.length) return;
-
-  const labels = data.map((entry, i) => `${entry.name} (${entry.date})`);
-  const scores = data.map(entry => entry.score);
-  if (window.historyChartInstance) window.historyChartInstance.destroy();
-  window.historyChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: 'Score over attempts',
-        data: scores,
-        fill: false,
-        borderColor: '#2196f3',
-        tension: 0.1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: 'Quiz Score History'
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          suggestedMax: answers.length
-        }
-      }
-    }
-  });
-}
-showHistoryChart();
-function renderChart(score, total) {
-  const ctx = document.getElementById('scoreChart').getContext('2d');
-  if (window.scoreChartInstance) window.scoreChartInstance.destroy();
-  window.scoreChartInstance = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Correct', 'Incorrect'],
-      datasets: [{
-        data: [score, total - score],
-        backgroundColor: ['#4caf50', '#f44336'],
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          position: 'bottom'
-        },
-        title: {
-          display: true,
-          text: 'Quiz Performance'
-        }
-      }
-    }
-  });
-}
-fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec")
-  .then(response => response.text())
-  .then(text => {
-    const rows = text.trim().split('\n'));
-    const parsed = rows.map(row => row.split(',')).slice(1);
-    const container = document.getElementById("remoteResults");
-    container.dataset.raw = text;
-    container.innerHTML = `<h2>All Participants</h2>`;
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
-    table.innerHTML = `<tr><th style='border:1px solid #ccc;padding:8px;'>Name</th><th style='border:1px solid #ccc;padding:8px;'>Score</th><th style='border:1px solid #ccc;padding:8px;'>Total</th><th style='border:1px solid #ccc;padding:8px;'>Date</th></tr>` +
-      parsed.map(row => `<tr><td style='border:1px solid #ccc;padding:8px;'>${row[0]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[1]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[2]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[3]}</td></tr>`).join('');
-    container.appendChild(table);
-    container.dataset.table = table.outerHTML;
-  })
-  .catch(err => console.error("Failed to load shared results", err));
-function filterTable() {
-  const input = document.getElementById("filterName").value.toLowerCase();
-  const container = document.getElementById("remoteResults");
-  const raw = container.dataset.raw || "";
-  const rows = raw.trim().split('\n');
-  const parsed = rows.map(row => row.split(',')).slice(1);
-  const filtered = parsed.filter(row => row[0].toLowerCase().includes(input));
-  const table = document.createElement("table");
-  table.style.borderCollapse = "collapse";
-  table.style.width = "100%";
-  table.innerHTML = `<tr><th style='border:1px solid #ccc;padding:8px;'>Name</th><th style='border:1px solid #ccc;padding:8px;'>Score</th><th style='border:1px solid #ccc;padding:8px;'>Total</th><th style='border:1px solid #ccc;padding:8px;'>Date</th></tr>` +
-    filtered.map(row => `<tr><td style='border:1px solid #ccc;padding:8px;'>${row[0]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[1]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[2]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[3]}</td></tr>`).join('');
-  container.querySelector("table")?.remove();
-  container.appendChild(table);
-}
-
-function refreshResults() {
-  fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec")
-    .then(response => response.text())
-    .then(text => {
-      const rows = text.trim().split('\n');
-      const parsed = rows.map(row => row.split(',')).slice(1);
-      const container = document.getElementById("remoteResults");
-      container.dataset.raw = text;
-      container.innerHTML = `<h2>All Participants</h2>`;
-      const table = document.createElement("table");
-      table.style.borderCollapse = "collapse";
-      table.style.width = "100%";
-      table.innerHTML = `<tr><th style='border:1px solid #ccc;padding:8px;'>Name</th><th style='border:1px solid #ccc;padding:8px;'>Score</th><th style='border:1px solid #ccc;padding:8px;'>Total</th><th style='border:1px solid #ccc;padding:8px;'>Date</th></tr>` +
-        parsed.map(row => `<tr><td style='border:1px solid #ccc;padding:8px;'>${row[0]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[1]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[2]}</td><td style='border:1px solid #ccc;padding:8px;'>${row[3]}</td></tr>`).join('');
-      container.appendChild(table);
-    })
-    .catch(err => console.error("Failed to refresh results", err));
-}
-</script>
+    renderQuiz();
+    loadResults();
+  </script>
 </body>
 </html>
