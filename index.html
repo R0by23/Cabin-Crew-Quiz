@@ -418,9 +418,7 @@ function refreshResults() {
   fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec")
     .then(response => response.text())
     .then(text => {
-      const rows = text.trim().split('\\n
-
-');
+      const rows = text.trim().split('\n');
       const parsed = rows.map(row => row.split(',')).slice(1);
       const container = document.getElementById("remoteResults");
       container.dataset.raw = text;
