@@ -18,125 +18,244 @@
   </style>
 </head>
 <body>
-  <h1>Cabin Crew Quiz</h1>
-  <form id="quizForm">
-    <label>Enter your name:</label>
-    <input type="text" id="username" required style="margin-bottom: 1rem; display: block; padding: 0.5rem; width: 100%; max-width: 400px;">
-    <div id="questionsContainer"></div>
-    <button type="submit" class="submit-btn">Submit Quiz</button>
-  </form>
+  <h1>Cabin Crew Quiz - Medical Conditions (50 Questions)</h1>
 
-  <div id="scoreDisplay" class="result"></div>
-  <div id="remoteResults"></div>
+  <div id="timer" style="font-weight: bold; margin-bottom: 1rem; color: #b30000;"></div>
+  <label for="username" style="font-weight:bold;">Enter your name:</label>
+<input type="text" id="username" placeholder="Your Name" style="margin-bottom:1rem; display:block; padding:0.5rem; font-size:1rem;" />
+<div id="quiz-container"></div>
 
-<script>
-const questions = [
-  { question: "What is the first action during sudden decompression?", options: ["Notify the captain", "Secure the cabin", "Grab oxygen mask", "Inform passengers"], correct: "C" },
-  { question: "Which passenger requires special handling before takeoff?", options: ["Passenger with crutches", "Unaccompanied minor", "Infant with parent", "Passenger in business class"], correct: "B" },
-  { question: "How should a passenger with a broken leg be seated?", options: ["Any free seat", "Next to an emergency exit", "Aisle seat with leg extended", "Middle seat"], correct: "C" },
-  { question: "What is the correct procedure during moderate turbulence?", options: ["Continue service", "Secure trolleys and sit down", "Go to cockpit", "Evacuate passengers"], correct: "B" },
-  { question: "How to identify a hidden disability?", options: ["Medical bracelet", "By asking directly", "Behavior observation", "Through ID card"], correct: "C" },
-  { question: "Who can approve the use of a passenger’s portable oxygen concentrator?", options: ["Cabin crew", "Captain", "Medical team at airport", "Another passenger"], correct: "B" },
-  { question: "When must cabin crew brief passengers with reduced mobility?", options: ["Only during long-haul flights", "After takeoff", "Before takeoff", "Before landing"], correct: "C" },
-  { question: "What is the correct response to an unconscious passenger?", options: ["Give water", "Start CPR", "Shake the passenger", "Call ground medical support"], correct: "B" },
-  { question: "How should infants be secured during turbulence?", options: ["In arms", "With seat belt extension", "On floor", "Standing with parent"], correct: "B" },
-  { question: "Which passenger must never be seated in an emergency exit row?", options: ["Able-bodied adult", "Frequent flyer", "Pregnant woman", "Passenger with glasses"], correct: "C" },
-  { question: "What is the correct use of a demo oxygen mask during safety briefing?", options: ["Place over mouth only", "Secure over nose and mouth", "Place over eyes", "Do not demonstrate"], correct: "B" },
-  { question: "Which item must cabin crew have during all flight phases?", options: ["Service checklist", "Crew ID", "Flashlight", "Passenger list"], correct: "C" },
-  { question: "How often should lavatories be checked during flight?", options: ["Once", "Every hour", "Every 30 minutes", "Before landing only"], correct: "C" },
-  { question: "Who is responsible for the safety of passengers onboard?", options: ["Captain", "Cabin crew", "Ground staff", "Passengers"], correct: "B" },
-  { question: "What does the acronym PBE stand for?", options: ["Personal Breathing Equipment", "Passenger Boarding Equipment", "Protective Breathing Equipment", "Portable Backup Equipment"], correct: "C" },
-  { question: "Where should a passenger with a guide dog be seated?", options: ["Emergency row", "Aisle seat front row", "Overwing exit", "Next to galley"], correct: "B" },
-  { question: "What should be done if a passenger refuses to follow instructions?", options: ["Ignore them", "Tell another crew", "Report to captain", "Argue with them"], correct: "C" },
-  { question: "What is the minimum age for an unaccompanied minor?", options: ["3", "5", "7", "12"], correct: "B" },
-  { question: "Which fire extinguisher is best for electronic equipment?", options: ["Foam", "Water", "Halon", "Powder"], correct: "C" },
-  { question: "How should cabin crew assist a blind passenger during boarding?", options: ["Walk ahead and speak loudly", "Offer arm for guidance", "Let them walk alone", "Hold their hand"], correct: "B" },
-  { question: "Which signal indicates an emergency descent?", options: ["One long chime", "Series of short chimes", "Seatbelt sign", "No signal"], correct: "B" },
-  { question: "What is the primary role of cabin crew in emergency?", options: ["Serve food", "Control passengers", "Ensure safety", "Call for help"], correct: "C" },
-  { question: "Which equipment is used for fire in waste bin?", options: ["Water extinguisher", "Halon extinguisher", "Crash axe", "Smoke hood"], correct: "B" },
-  { question: "Which passenger is allowed to bring a Personal Oxygen Bottle?", options: ["Only cabin crew", "No one", "With prior medical approval", "Business class only"], correct: "C" },
-  { question: "How many infant seatbelts per row are permitted?", options: ["1", "2", "3", "Unlimited"], correct: "B" },
-  { question: "How should you treat a minor bleeding onboard?", options: ["Ignore", "Use first aid kit", "Call paramedic", "Use toilet paper"], correct: "B" },
-  { question: "What color is emergency exit signage typically?", options: ["Red", "Green", "Blue", "Yellow"], correct: "B" },
-  { question: "What is the crew’s action after an aborted takeoff?", options: ["Resume service", "Wait for captain’s instruction", "Evacuate immediately", "Open doors"], correct: "B" },
-  { question: "What is the safest posture for impact?", options: ["Sit upright", "Arms folded", "Brace position", "Leaning left"], correct: "C" },
-  { question: "Where do you stow a disabled passenger’s wheelchair?", options: ["Lavatory", "Overhead bin", "Cargo hold", "Emergency exit"], correct: "C" },
-  { question: "What should cabin crew do before opening aircraft door?", options: ["Check for noise", "Wait 10 minutes", "Confirm disarm status", "Use axe"], correct: "C" },
-  { question: "What’s the purpose of crew resource management (CRM)?", options: ["Increase speed", "Manage crew fatigue", "Improve teamwork and communication", "Track inventory"], correct: "C" },
-  { question: "What should be done if oxygen masks deploy?", options: ["Remove them", "Wear immediately", "Call ground staff", "Close vents"], correct: "B" },
-  { question: "Where is the ELT located?", options: ["Cockpit only", "In seat back pocket", "In aircraft tail or under seat", "Lavatory"], correct: "C" },
-  { question: "What should be checked before giving first aid?", options: ["Oxygen levels", "Scene safety", "Seatbelt", "Time of day"], correct: "B" },
-  { question: "Who must be briefed in an emergency landing?", options: ["Only VIPs", "Passengers in overwing exits", "Crew only", "All passengers"], correct: "D" },
-  { question: "What is the first step in using an AED?", options: ["Turn it on", "Check breathing", "Insert battery", "Call for help"], correct: "A" },
-  { question: "What does the cabin crew shout during evacuation?", options: ["Go now!", "Hurry up!", "Evacuate! Evacuate!", "Move fast!"], correct: "C" },
-  { question: "Which item is NOT found in a first aid kit?", options: ["Bandages", "Sutures", "Gloves", "Scissors"], correct: "B" },
-  { question: "When can PEDs be used during flight?", options: ["Only at cruise", "Never", "When permitted by airline", "During taxi only"], correct: "C" },
-  { question: "Who can use a seatbelt extension?", options: ["Anyone", "Crew only", "Passengers needing it", "Only minors"], correct: "C" },
-  { question: "Where should infants under 2 sit?", options: ["In separate seat", "On adult’s lap with belt", "Standing with belt", "Aisle seat"], correct: "B" },
-  { question: "What to do if smoke is detected in cabin?", options: ["Ignore", "Report and locate", "Spray air freshener", "Close windows"], correct: "B" },
-  { question: "What must be included in a preflight security check?", options: ["Water stock", "Cabin lighting", "Presence of suspicious items", "Passenger list"], correct: "C" },
-  { question: "What’s the last item in evacuation flow?", options: ["Check seatbelts", "Leave last", "Open doors", "Check galley"], correct: "B" },
-  { question: "Where is the fire axe stored?", options: ["Galley", "Cockpit", "Overhead bin", "Toilet"], correct: "B" },
-  { question: "How do you handle airsickness?", options: ["Call doctor", "Give water and bag", "Ignore", "Offer oxygen"], correct: "B" },
-  { question: "How often is a water fire extinguisher checked?", options: ["Every flight", "Monthly", "Annually", "Only if used"], correct: "A" },
-  { question: "What defines a ‘special category passenger’?", options: ["Frequent flyer", "Passenger with special needs", "VIP", "Anyone needing extra luggage"], correct: "B" },
-  { question: "What is the indication of cabin pressurization loss?", options: ["Seatbelt sign", "Fog and loud bang", "Call from cockpit", "Passenger standing"], correct: "B" } 
+  <button class="submit-btn" onclick="gradeQuizWithValidation()">Submit</button>
+  <button class="submit-btn" onclick="resetQuiz()">Try Again</button>
+  <div class="result" id="result"></div>
+<canvas id="scoreChart" width="400" height="200" style="margin-top: 1rem;"></canvas>
+<div id="remoteResults" style="margin-top: 2rem;"></div>
+<div style="margin-top:1rem;">
+  <label for="filterName"><strong>Filter by name:</strong></label>
+  <input type="text" id="filterName" placeholder="Enter name to filter" style="padding:0.5rem; margin-left:0.5rem; font-size:1rem;" oninput="filterTable()">
+  <button onclick="refreshResults()" style="margin-left:1rem; padding:0.5rem 1rem; cursor:pointer;">🔄 Refresh</button>
+</div>
+
+  <script>
+    const questions = [
+      "What is the first step when a passenger reports feeling chest pain?",
+      "Can passengers carry personal medication onboard?",
+      "What is the purpose of a MEDIF form?",
+      "When assisting a diabetic passenger, what must crew avoid?",
+      "A passenger has a seizure. What is your first response?",
+      "Oxygen bottles onboard should be used:",
+      "Can a person with a recent surgery fly?",
+      "A passenger vomits repeatedly. What is the correct action?",
+      "What is hypoxia?",
+      "What tool measures passenger oxygen level?",
+      "A mentally ill passenger begins shouting. What should crew do?",
+      "What condition may require immediate landing?",
+      "What is DVT?",
+      "For a passenger who faints briefly, crew should:",
+      "Are flight attendants allowed to give injections?",
+      "Who decides if medical diversion is needed?",
+      "What is a common risk for elderly passengers?",
+      "A child with high fever is boarding. Action?",
+      "How to identify asthma emergency?",
+      "Where should EEMK be located?",
+      "If a passenger with diabetes appears confused and sweaty, what should you do?",
+      "What is the role of a Good Samaritan doctor on board?",
+      "Can a person with epilepsy fly?",
+      "When using an onboard defibrillator (AED), the first step is to:",
+      "What is considered a communicable disease?",
+      "What precaution applies to passengers with infectious diseases?",
+      "What is hyperventilation?",
+      "For a burn injury onboard, apply:",
+      "Who has authority over use of medical kits onboard?",
+      "What is motion sickness?",
+      "Which passenger condition requires careful seat allocation?",
+      "A choking passenger shows no breath or sound. Action?",
+      "What is hypoglycemia?",
+      "Which medical item is found in both FAK and EEMK?",
+      "How do you calm a passenger having a panic attack?",
+      "What’s the use of the demo mask?",
+      "A child with asthma forgets their inhaler. Crew should:",
+      "Can airline refuse to board someone with recent contagious illness?",
+      "What is the purpose of a medical alert bracelet?",
+      "If a patient has oxygen support needs, what should be verified?",
+      "What is the purpose of reclined seat for medical passengers?",
+      "Which symptom needs urgent care?",
+      "What medical condition is worsened by low cabin pressure?",
+      "How should crew handle suspected stroke?",
+      "A person reports an allergic reaction. What do you check?",
+      "What is used in CPR?",
+      "A bleeding nose should be treated by:",
+      "Medical emergency midflight – what must be documented?",
+      "Can a passenger with hearing impairment sit in exit row?",
+      "What is the crew’s duty during any onboard medical case?"
+    ];
+
+    const options = [
+      ["A. Offer water", "B. Notify senior crew and assess condition", "C. Move them to the galley", "D. Let them rest"],
+      ["A. No", "B. Only in cargo", "C. Yes, with proper documentation", "D. Yes, but not in carry-on"],
+      ["A. Identification", "B. Customs declaration", "C. Medical fitness to fly", "D. Lost luggage report"],
+      ["A. Offering sweet snacks", "B. Giving water", "C. Providing insulin", "D. Ignoring symptoms"],
+      ["A. Insert a spoon", "B. Protect and monitor", "C. Restrain", "D. Ask others to film"],
+      ["A. Any faint passenger", "B. Crew only", "C. Per protocol", "D. Hyperactive children"],
+      ["A. Always", "B. Doctor’s clearance", "C. Never", "D. Under 2 hours"],
+      ["A. Move seat", "B. Offer alcohol", "C. Provide bag & assess", "D. Ignore"],
+      ["A. Blood sugar drop", "B. Oxygen deficiency", "C. Panic disorder", "D. Jetlag"],
+      ["A. Glucometer", "B. Thermometer", "C. Pulse oximeter", "D. ECG monitor"],
+      ["A. Shout back", "B. De-escalate & alert", "C. Ignore", "D. Ask passengers"],
+      ["A. Mild fever", "B. Heart attack symptoms", "C. Motion sickness", "D. Muscle cramp"],
+      ["A. Deep Vein Thrombosis", "B. Delayed Vital Test", "C. Vision Trouble", "D. Decompression test"],
+      ["A. Call cockpit", "B. Offer alcohol", "C. Lay flat & elevate legs", "D. Move row"],
+      ["A. Yes", "B. No, unless trained", "C. Only in emergencies", "D. Always"],
+      ["A. Crew", "B. Doctor onboard", "C. Captain", "D. Purser"],
+      ["A. Jetlag", "B. DVT & dehydration", "C. Overeating", "D. Air rage"],
+      ["A. Allow", "B. Require clearance", "C. Ignore parent", "D. Give candy"],
+      ["A. Fast talking", "B. Wheezing", "C. Sleepiness", "D. Nausea"],
+      ["A. Cockpit", "B. Rear galley", "C. Accessible area", "D. Crew rest"],
+      ["A. Offer juice", "B. Offer water", "C. Ask to sleep", "D. Ignore"],
+      ["A. Provide food", "B. Medical help voluntarily", "C. Ignore", "D. Supervise crew"],
+      ["A. Never", "B. With medication", "C. Business class only", "D. With doctor"],
+      ["A. Press button", "B. Apply pads & power on", "C. Call captain", "D. Check battery"],
+      ["A. Migraine", "B. Flu with rash", "C. Broken leg", "D. Jetlag"],
+      ["A. Seat in cockpit", "B. Deny or isolate", "C. Ignore", "D. Give water"],
+      ["A. Lack of oxygen", "B. Rapid breathing", "C. Low sugar", "D. Altitude"],
+      ["A. Ice", "B. Ointment", "C. Cool water", "D. Salt"],
+      ["A. Any attendant", "B. Captain/senior crew", "C. Ground staff", "D. Purser"],
+      ["A. Mental illness", "B. Imbalance reaction", "C. Panic", "D. Injury"],
+      ["A. Broken arm", "B. Nosebleed", "C. Obesity", "D. Sunglasses"],
+      ["A. Call doctor", "B. Encourage cough", "C. Heimlich", "D. Water"],
+      ["A. High BP", "B. High sugar", "C. Low sugar", "D. Low oxygen"],
+      ["A. Aspirin", "B. Syringe", "C. Bandages", "D. Thermometer"],
+      ["A. Oxygen", "B. Calm voice", "C. Ignore", "D. Water"],
+      ["A. Fire mask", "B. Oxygen demo mask", "C. Training only", "D. Evac tool"],
+      ["A. Ignore", "B. Oxygen & kit", "C. Move", "D. Candy"],
+      ["A. No", "B. Yes, safety", "C. Economy only", "D. With police"],
+      ["A. Decoration", "B. Allergy ID", "C. Passport", "D. Airline use"],
+      ["A. Stylish", "B. Battery, flow, approval", "C. Family consent", "D. Insurance"],
+      ["A. Entertainment", "B. Meal service", "C. Circulation", "D. Baggage"],
+      ["A. Dry mouth", "B. Chest pain", "C. Tiredness", "D. Burping"],
+      ["A. Hypertension", "B. Jetlag", "C. Appendicitis", "D. Altitude sickness"],
+      ["A. Ignore", "B. Monitor", "C. FAST: Face, Arms, Speech, Time", "D. Passport"],
+      ["A. Itinerary", "B. EpiPen", "C. Shoes", "D. Passport"],
+      ["A. Oxygen", "B. CPR compressions + breaths", "C. Bandages", "D. AED only"],
+      ["A. Tilt back", "B. Pinch & lean forward", "C. Blanket", "D. Blow nose"],
+      ["A. Nationality", "B. Incident & actions", "C. Flight time", "D. Gate"],
+      ["A. Always", "B. With glasses", "C. With crew approval", "D. Never"],
+      ["A. Duty-free", "B. Follow protocol & report", "C. Wait captain", "D. Ask passengers"]
+    ];
+
+    const answers = ["B","C","C","A","B","C","B","C","B","C","B","B","A","C","B","C","B","B","B","C","A","B","B","B","B","B","B","C","B","B","C","C","C","C","B","B","B","B","B","B","C","B","D","C","B","B","B","B","C","B"];
+
+    const quizContainer = document.getElementById("quiz-container");
+    questions.forEach((question, index) => {
+      const div = document.createElement("div");
+      div.className = "question";
+      div.innerHTML = `<h3>${index + 1}. ${question}</h3>` +
+        options[index].map(option => `<label><input type="radio" name="q${index + 1}" value="${option.charAt(0)}"> ${option}</label>`).join("");
+      quizContainer.appendChild(div);
+    });
+
+    let quizHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+
+function gradeQuiz() {
+  const explanations = [
+  "Chest pain can be a serious symptom of a heart attack. Notifying the senior crew allows for proper assessment and potential diversion if needed.",
+  "Passengers are allowed to bring medication onboard as long as it's properly documented, labeled, and declared, especially if medically necessary.",
+  "A MEDIF (Medical Information Form) is used to confirm a passenger’s medical fitness to fly, especially in special conditions or after recent health issues.",
+  "While sweet snacks can help a diabetic in hypoglycemia, blindly offering them without checking the situation may cause more harm. Always verify or ask.",
+  "The priority is to prevent injury and monitor breathing. Never insert objects or restrain someone during a seizure.",
+  "Oxygen must be administered following airline protocol, and only when necessary based on symptoms and crew training.",
+  "Recent surgery can increase the risk of complications such as deep vein thrombosis. A medical clearance ensures it's safe to fly.",
+  "Repeated vomiting may indicate a more serious issue. The crew should comfort the passenger, assess, and follow procedures.",
+  "Hypoxia means low oxygen levels in the body, which can happen due to cabin pressure issues or breathing problems.",
+  "Pulse oximeters are non-invasive devices that measure blood oxygen saturation and help assess passengers in distress.",
+  "Shouting or provoking a mentally ill passenger can escalate things. Crew should de-escalate calmly and notify the senior crew.",
+  "Heart attack symptoms mid-flight are life-threatening. Immediate landing may be necessary for medical attention.",
+  "DVT (Deep Vein Thrombosis) is the formation of clots in the legs, usually from long immobility. It's dangerous during flights.",
+  "Raising the legs while laying flat improves blood flow to the brain, aiding in recovery from fainting spells.",
+  "Only medically trained and authorized crew should administer injections, and only when protocols allow it.",
+  "The captain has final authority to approve a medical diversion based on crew reports and medical advice if available.",
+  "Older passengers are at higher risk of dehydration, circulatory issues, and slower responses. Crew should monitor closely.",
+  "Fever in children can indicate contagious illness. A medical clearance is needed to ensure the child’s and others’ safety.",
+  "Asthma emergencies often involve wheezing, retractions, and rapid breathing. Immediate care is required.",
+  "The Enhanced Emergency Medical Kit (EEMK) must be accessible in a marked and approved location known by the crew.",
+  "Confusion and sweating are symptoms of hypoglycemia. Juice or glucose should be administered immediately.",
+  "Doctors traveling as passengers can provide emergency aid under Good Samaritan laws if willing and able.",
+  "Epileptic passengers can usually travel safely if the condition is stable and medication is taken properly.",
+  "The AED (Automated External Defibrillator) should be powered on and pads applied immediately. It provides voice prompts for the user.",
+  "Symptoms like rash with fever can indicate a communicable disease. It may require isolation or denial of boarding.",
+  "Airlines can deny boarding or isolate passengers with contagious diseases to protect others onboard.",
+  "Hyperventilation is caused by anxiety or panic, not oxygen deficiency. Calming the person helps regulate breathing.",
+  "Burns should be treated by applying cool water, not ointment or ice, which could damage skin further.",
+  "Only the captain or senior crew can authorize the use of medical kits to ensure accountability and protocol adherence.",
+  "Motion sickness is caused by a mismatch between what the eyes see and the inner ear senses, leading to nausea.",
+  "Passengers with obesity may require special seating arrangements and must not obstruct aisles or emergency exits.",
+  "If someone is choking and cannot breathe or speak, the Heimlich maneuver (abdominal thrusts) must be applied immediately.",
+  "Hypoglycemia is low blood sugar, which can cause confusion, fainting, or seizures if untreated.",
+  "Bandages are part of both the First Aid Kit (FAK) and the Enhanced Emergency Medical Kit (EEMK) for treating wounds.",
+  "Reassuring tone, calm body language, and encouraging slow breathing are key to helping a person through a panic attack.",
+  "The demo mask is used to teach passengers how to put on oxygen masks properly in the event of cabin depressurization.",
+  "If a child with asthma has no inhaler, oxygen may be given and other first aid or emergency kit supplies may be used.",
+  "Yes, the airline can deny boarding to protect others when a passenger recently had or shows signs of a contagious illness.",
+  "Medical alert bracelets inform the crew about important conditions (like diabetes or allergies) in case of emergency.",
+  "Crew must verify battery level, flow rate, and airline approval for any personal oxygen support equipment onboard.",
+  "Reclined seats help improve blood flow and reduce stress, especially for passengers recovering from illness or at risk of DVT.",
+  "Chest pain may indicate a heart attack and requires immediate attention, even if symptoms are vague or mild.",
+  "Altitude sickness occurs when low oxygen at cabin pressure levels worsens pre-existing conditions like heart or lung disease.",
+  "The FAST method (Face drooping, Arm weakness, Speech issues, Time to call) helps detect strokes early in-flight.",
+  "An allergic reaction may escalate into anaphylaxis. Check for an EpiPen or any signs of airway obstruction immediately.",
+  "CPR involves chest compressions and rescue breaths to maintain circulation and oxygen to vital organs.",
+  "The correct method is to pinch the nose and lean forward to prevent swallowing blood and to allow drainage.",
+  "Crew must record symptoms, actions taken, and persons involved during any medical emergency to support post-flight reports.",
+  "Passengers in exit rows must be able to hear, see, and understand instructions clearly and act without assistance.",
+  "Crew are required to follow the airline’s medical protocol, assist the passenger, and report everything appropriately."
 ];
 
-const questionsContainer = document.getElementById("questionsContainer");
-questions.forEach((q, idx) => {
-  const div = document.createElement("div");
-  div.className = "question";
-  div.innerHTML = `<h3>${q.question}</h3>` + q.options.map(opt => `
-    <label><input type="radio" name="q${idx}" value="${opt}" required /> ${opt}</label>
-  `).join('');
-  questionsContainer.appendChild(div);
-});
-
-const form = document.getElementById("quizForm");
-form.addEventListener("submit", function(e) {
-  e.preventDefault();
-  const name = document.getElementById("username").value.trim();
   let score = 0;
-  questions.forEach((q, idx) => {
-    const selected = document.querySelector(`input[name='q${idx}']:checked`);
-    if (selected && selected.value === q.correct) score++;
-  });
-
-  document.getElementById("scoreDisplay").innerText = `You scored ${score} out of ${questions.length}`;
-
-  const payload = { name, score, total: questions.length };
-
+  for (let i = 0; i < answers.length; i++) {
+    const selected = document.querySelector(`input[name="q${i + 1}"]:checked`);
+    const questionDiv = document.querySelector(`#quiz-container .question:nth-child(${i + 1})`);
+    const existingExplanation = questionDiv.querySelector('.explanation');
+    if (existingExplanation) existingExplanation.remove();
+    if (selected && selected.value === answers[i]) {
+      score++;
+    } else {
+      const explanationText = explanations[i] || "No explanation available.";
+      const explanationDiv = document.createElement("div");
+      explanationDiv.className = "explanation";
+      explanationDiv.style.marginTop = "0.5rem";
+      explanationDiv.style.color = "#b30000";
+      explanationDiv.innerHTML = `<strong>Correct Answer:</strong> ${answers[i]}<br><strong>Explanation:</strong> ${explanationText}`;
+      questionDiv.appendChild(explanationDiv);
+    }
+  }
+  const percentage = Math.round((score / answers.length) * 100);
+  let message = "";
+  if (percentage >= 90) {
+    message = "🏅 Excellent work!";
+  } else if (percentage >= 75) {
+    message = "👍 Good job! Keep practicing.";
+  } else if (percentage >= 50) {
+    message = "✅ Fair, but review is needed.";
+  } else {
+    message = "❗ Needs improvement. Review the material again.";
+  }
+  document.getElementById("result").innerHTML = `You scored ${score} out of ${answers.length} (${percentage}%)<br><progress value="${score}" max="${answers.length}" style="width:100%; height: 20px;"></progress><br><span style='display:inline-block; margin-top: 0.5rem;'>${message}</span>`;
+  renderChart(score, answers.length);
+  const username = document.getElementById('username').value || 'Anonymous';
+  quizHistory.push({ name: username, score, total: answers.length, date: new Date().toLocaleString() });
+  localStorage.setItem('quizHistory', JSON.stringify(quizHistory));
+  showHistoryChart();
   fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  }).then(res => res.text()).then(resp => {
-    console.log("Saved:", resp);
-    loadResults();
-  });
-});
-
-async function loadResults() {
-  try {
-    const response = await fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec");
-    const text = await response.text();
-    const json = JSON.parse(text);
-    const container = document.getElementById("remoteResults");
-    container.innerHTML = `<h2>All Participants</h2>`;
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
-    table.innerHTML = `<tr><th style='border:1px solid #ccc;padding:8px;'>Name</th><th style='border:1px solid #ccc;padding:8px;'>Score</th><th style='border:1px solid #ccc;padding:8px;'>Total</th><th style='border:1px solid #ccc;padding:8px;'>Date</th></tr>` +
-      json.map(row => `<tr><td style='border:1px solid #ccc;padding:8px;'>${row.name}</td><td style='border:1px solid #ccc;padding:8px;'>${row.score}</td><td style='border:1px solid #ccc;padding:8px;'>${row.total}</td><td style='border:1px solid #ccc;padding:8px;'>${row.date}</td></tr>`).join('');
-    container.appendChild(table);
-  } catch (err) {
-    console.error("Failed to load shared results", err);
-  }
+    body: JSON.stringify({
+      name: username,
+      score: score,
+      total: answers.length
+    }),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  }).then(res => console.log("Sent to Google Sheet"))
+    .catch(err => console.error("Error sending to Google Sheet", err));
 }
-
-loadResults();
-</script>
-</body>
-</html>
 
