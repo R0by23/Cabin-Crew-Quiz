@@ -18,22 +18,114 @@
   </style>
 </head>
 <body>
+  <h1>Cabin Crew Quiz</h1>
+  <form id="quizForm">
+    <label>Enter your name:</label>
+    <input type="text" id="username" required style="margin-bottom: 1rem; display: block; padding: 0.5rem; width: 100%; max-width: 400px;">
+    <div id="questionsContainer"></div>
+    <button type="submit" class="submit-btn">Submit Quiz</button>
+  </form>
+
+  <div id="scoreDisplay" class="result"></div>
   <div id="remoteResults"></div>
 
 <script>
-(async function loadResults() {
+const questions = [
+  { question: "What is the first action during sudden decompression?", options: ["Notify the captain", "Secure the cabin", "Grab oxygen mask", "Inform passengers"], correct: "C" },
+  { question: "Which passenger requires special handling before takeoff?", options: ["Passenger with crutches", "Unaccompanied minor", "Infant with parent", "Passenger in business class"], correct: "B" },
+  { question: "How should a passenger with a broken leg be seated?", options: ["Any free seat", "Next to an emergency exit", "Aisle seat with leg extended", "Middle seat"], correct: "C" },
+  { question: "What is the correct procedure during moderate turbulence?", options: ["Continue service", "Secure trolleys and sit down", "Go to cockpit", "Evacuate passengers"], correct: "B" },
+  { question: "How to identify a hidden disability?", options: ["Medical bracelet", "By asking directly", "Behavior observation", "Through ID card"], correct: "C" },
+  { question: "Who can approve the use of a passenger’s portable oxygen concentrator?", options: ["Cabin crew", "Captain", "Medical team at airport", "Another passenger"], correct: "B" },
+  { question: "When must cabin crew brief passengers with reduced mobility?", options: ["Only during long-haul flights", "After takeoff", "Before takeoff", "Before landing"], correct: "C" },
+  { question: "What is the correct response to an unconscious passenger?", options: ["Give water", "Start CPR", "Shake the passenger", "Call ground medical support"], correct: "B" },
+  { question: "How should infants be secured during turbulence?", options: ["In arms", "With seat belt extension", "On floor", "Standing with parent"], correct: "B" },
+  { question: "Which passenger must never be seated in an emergency exit row?", options: ["Able-bodied adult", "Frequent flyer", "Pregnant woman", "Passenger with glasses"], correct: "C" },
+  { question: "What is the correct use of a demo oxygen mask during safety briefing?", options: ["Place over mouth only", "Secure over nose and mouth", "Place over eyes", "Do not demonstrate"], correct: "B" },
+  { question: "Which item must cabin crew have during all flight phases?", options: ["Service checklist", "Crew ID", "Flashlight", "Passenger list"], correct: "C" },
+  { question: "How often should lavatories be checked during flight?", options: ["Once", "Every hour", "Every 30 minutes", "Before landing only"], correct: "C" },
+  { question: "Who is responsible for the safety of passengers onboard?", options: ["Captain", "Cabin crew", "Ground staff", "Passengers"], correct: "B" },
+  { question: "What does the acronym PBE stand for?", options: ["Personal Breathing Equipment", "Passenger Boarding Equipment", "Protective Breathing Equipment", "Portable Backup Equipment"], correct: "C" },
+  { question: "Where should a passenger with a guide dog be seated?", options: ["Emergency row", "Aisle seat front row", "Overwing exit", "Next to galley"], correct: "B" },
+  { question: "What should be done if a passenger refuses to follow instructions?", options: ["Ignore them", "Tell another crew", "Report to captain", "Argue with them"], correct: "C" },
+  { question: "What is the minimum age for an unaccompanied minor?", options: ["3", "5", "7", "12"], correct: "B" },
+  { question: "Which fire extinguisher is best for electronic equipment?", options: ["Foam", "Water", "Halon", "Powder"], correct: "C" },
+  { question: "How should cabin crew assist a blind passenger during boarding?", options: ["Walk ahead and speak loudly", "Offer arm for guidance", "Let them walk alone", "Hold their hand"], correct: "B" },
+  { question: "Which signal indicates an emergency descent?", options: ["One long chime", "Series of short chimes", "Seatbelt sign", "No signal"], correct: "B" },
+  { question: "What is the primary role of cabin crew in emergency?", options: ["Serve food", "Control passengers", "Ensure safety", "Call for help"], correct: "C" },
+  { question: "Which equipment is used for fire in waste bin?", options: ["Water extinguisher", "Halon extinguisher", "Crash axe", "Smoke hood"], correct: "B" },
+  { question: "Which passenger is allowed to bring a Personal Oxygen Bottle?", options: ["Only cabin crew", "No one", "With prior medical approval", "Business class only"], correct: "C" },
+  { question: "How many infant seatbelts per row are permitted?", options: ["1", "2", "3", "Unlimited"], correct: "B" },
+  { question: "How should you treat a minor bleeding onboard?", options: ["Ignore", "Use first aid kit", "Call paramedic", "Use toilet paper"], correct: "B" },
+  { question: "What color is emergency exit signage typically?", options: ["Red", "Green", "Blue", "Yellow"], correct: "B" },
+  { question: "What is the crew’s action after an aborted takeoff?", options: ["Resume service", "Wait for captain’s instruction", "Evacuate immediately", "Open doors"], correct: "B" },
+  { question: "What is the safest posture for impact?", options: ["Sit upright", "Arms folded", "Brace position", "Leaning left"], correct: "C" },
+  { question: "Where do you stow a disabled passenger’s wheelchair?", options: ["Lavatory", "Overhead bin", "Cargo hold", "Emergency exit"], correct: "C" },
+  { question: "What should cabin crew do before opening aircraft door?", options: ["Check for noise", "Wait 10 minutes", "Confirm disarm status", "Use axe"], correct: "C" },
+  { question: "What’s the purpose of crew resource management (CRM)?", options: ["Increase speed", "Manage crew fatigue", "Improve teamwork and communication", "Track inventory"], correct: "C" },
+  { question: "What should be done if oxygen masks deploy?", options: ["Remove them", "Wear immediately", "Call ground staff", "Close vents"], correct: "B" },
+  { question: "Where is the ELT located?", options: ["Cockpit only", "In seat back pocket", "In aircraft tail or under seat", "Lavatory"], correct: "C" },
+  { question: "What should be checked before giving first aid?", options: ["Oxygen levels", "Scene safety", "Seatbelt", "Time of day"], correct: "B" },
+  { question: "Who must be briefed in an emergency landing?", options: ["Only VIPs", "Passengers in overwing exits", "Crew only", "All passengers"], correct: "D" },
+  { question: "What is the first step in using an AED?", options: ["Turn it on", "Check breathing", "Insert battery", "Call for help"], correct: "A" },
+  { question: "What does the cabin crew shout during evacuation?", options: ["Go now!", "Hurry up!", "Evacuate! Evacuate!", "Move fast!"], correct: "C" },
+  { question: "Which item is NOT found in a first aid kit?", options: ["Bandages", "Sutures", "Gloves", "Scissors"], correct: "B" },
+  { question: "When can PEDs be used during flight?", options: ["Only at cruise", "Never", "When permitted by airline", "During taxi only"], correct: "C" },
+  { question: "Who can use a seatbelt extension?", options: ["Anyone", "Crew only", "Passengers needing it", "Only minors"], correct: "C" },
+  { question: "Where should infants under 2 sit?", options: ["In separate seat", "On adult’s lap with belt", "Standing with belt", "Aisle seat"], correct: "B" },
+  { question: "What to do if smoke is detected in cabin?", options: ["Ignore", "Report and locate", "Spray air freshener", "Close windows"], correct: "B" },
+  { question: "What must be included in a preflight security check?", options: ["Water stock", "Cabin lighting", "Presence of suspicious items", "Passenger list"], correct: "C" },
+  { question: "What’s the last item in evacuation flow?", options: ["Check seatbelts", "Leave last", "Open doors", "Check galley"], correct: "B" },
+  { question: "Where is the fire axe stored?", options: ["Galley", "Cockpit", "Overhead bin", "Toilet"], correct: "B" },
+  { question: "How do you handle airsickness?", options: ["Call doctor", "Give water and bag", "Ignore", "Offer oxygen"], correct: "B" },
+  { question: "How often is a water fire extinguisher checked?", options: ["Every flight", "Monthly", "Annually", "Only if used"], correct: "A" },
+  { question: "What defines a ‘special category passenger’?", options: ["Frequent flyer", "Passenger with special needs", "VIP", "Anyone needing extra luggage"], correct: "B" },
+  { question: "What is the indication of cabin pressurization loss?", options: ["Seatbelt sign", "Fog and loud bang", "Call from cockpit", "Passenger standing"], correct: "B" } => ({
+    question: `Placeholder question ${i + 11}?`,
+    options: ["A", "B", "C", "D"],
+    correct: "A"
+  }))
+];
+
+const questionsContainer = document.getElementById("questionsContainer");
+questions.forEach((q, idx) => {
+  const div = document.createElement("div");
+  div.className = "question";
+  div.innerHTML = `<h3>${q.question}</h3>` + q.options.map(opt => `
+    <label><input type="radio" name="q${idx}" value="${opt}" required /> ${opt}</label>
+  `).join('');
+  questionsContainer.appendChild(div);
+});
+
+const form = document.getElementById("quizForm");
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+  const name = document.getElementById("username").value.trim();
+  let score = 0;
+  questions.forEach((q, idx) => {
+    const selected = document.querySelector(`input[name='q${idx}']:checked`);
+    if (selected && selected.value === q.correct) score++;
+  });
+
+  document.getElementById("scoreDisplay").innerText = `You scored ${score} out of ${questions.length}`;
+
+  const payload = { name, score, total: questions.length };
+
+  fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(res => res.text()).then(resp => {
+    console.log("Saved:", resp);
+    loadResults();
+  });
+});
+
+async function loadResults() {
   try {
     const response = await fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec");
-
-    // Try to parse even if content-type header is missing
     const text = await response.text();
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch (parseError) {
-      throw new Error("Invalid JSON response:", parseError);
-    }
-
+    const json = JSON.parse(text);
     const container = document.getElementById("remoteResults");
     container.innerHTML = `<h2>All Participants</h2>`;
     const table = document.createElement("table");
@@ -43,42 +135,11 @@
       json.map(row => `<tr><td style='border:1px solid #ccc;padding:8px;'>${row.name}</td><td style='border:1px solid #ccc;padding:8px;'>${row.score}</td><td style='border:1px solid #ccc;padding:8px;'>${row.total}</td><td style='border:1px solid #ccc;padding:8px;'>${row.date}</td></tr>`).join('');
     container.appendChild(table);
   } catch (err) {
-    const container = document.getElementById("remoteResults");
-    container.innerHTML = `<p style="color: red;">Failed to load shared results. Please try again later.</p>`;
     console.error("Failed to load shared results", err);
   }
-})();
-</script>
-<button onclick="sendTestData()" style="margin-top: 2rem; padding: 0.5rem 1rem; background: green; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">Trimite scor test</button>
-
-<script>
-function sendTestData() {
-  const payload = {
-    name: "Roby",
-    score: 19,
-    total: 20
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  })
-    .then(res => {
-      if (res.ok) {
-        alert("Test score sent successfully!");
-        location.reload();
-      } else {
-        alert("Failed to send test data.");
-      }
-    })
-    .catch(err => {
-      console.error("POST error:", err);
-      alert("Error sending test data.");
-    });
 }
+
+loadResults();
 </script>
 </body>
 </html>
