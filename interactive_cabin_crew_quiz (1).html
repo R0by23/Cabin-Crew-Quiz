@@ -49,5 +49,36 @@
   }
 })();
 </script>
+<button onclick="sendTestData()" style="margin-top: 2rem; padding: 0.5rem 1rem; background: green; color: white; border: none; border-radius: 0.25rem; cursor: pointer;">Trimite scor test</button>
+
+<script>
+function sendTestData() {
+  const payload = {
+    name: "Roby",
+    score: 19,
+    total: 20
+  };
+
+  fetch("https://script.google.com/macros/s/AKfycbzb-Pwrh5dIeIiyVc3UsUYc_2j_WbgMHyvZNW4Wi3XF0vHgGqrzRQVo4snxRvz5GSW3/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+    .then(res => {
+      if (res.ok) {
+        alert("Test score sent successfully!");
+        location.reload();
+      } else {
+        alert("Failed to send test data.");
+      }
+    })
+    .catch(err => {
+      console.error("POST error:", err);
+      alert("Error sending test data.");
+    });
+}
+</script>
 </body>
 </html>
